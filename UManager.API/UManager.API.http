@@ -1,0 +1,6 @@
+@UManager.API_HostAddress = http://localhost:5059
+
+GET {{UManager.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
