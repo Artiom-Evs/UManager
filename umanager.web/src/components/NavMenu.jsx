@@ -1,6 +1,7 @@
 import { Component } from "react";
-import { Collapse, NavItem, NavLink, Navbar, NavbarBrand, NavbarToggler } from "reactstrap";
+import { Collapse, Nav, NavItem, NavLink, Navbar, NavbarBrand, NavbarToggler } from "reactstrap";
 import { Link } from 'react-router-dom';
+import { LoginMenu } from "./auth/LoginMenu";
 
 export class NavMenu extends Component {
   static displayName = NavMenu.name;
@@ -26,12 +27,15 @@ export class NavMenu extends Component {
         <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
           <NavbarBrand tag={Link}  to="/">UManager</NavbarBrand>
           <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
-          <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
-            <ul className="navbar-nav flex-grow">
+          <Collapse className="d-sm-inline-flex" isOpen={!this.state.collapsed} navbar>
+            <Nav className="flex-fill" navbar>
               <NavItem>
                 <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
               </NavItem>
-            </ul>
+            </Nav>
+            <Nav navbar>
+              <LoginMenu></LoginMenu>
+            </Nav>
           </Collapse>
         </Navbar>
       </header>
