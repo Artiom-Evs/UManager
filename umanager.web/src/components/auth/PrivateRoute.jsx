@@ -1,10 +1,9 @@
 import { Component } from "react";
-import authService from './AuthorizationService';
-import { Login } from "./Login";
 import { Navigate } from "react-router-dom";
+import authService from './AuthorizationService';
 import { AppPaths, QueryParameterNames } from "./AuthConstants";
-
-export class AuthorizeRoute extends Component {
+``
+export class PrivateRoute extends Component {
     constructor(props) {
         super(props);
 
@@ -28,10 +27,7 @@ export class AuthorizeRoute extends Component {
             return element;
         }
 
-        var link = document.createElement("a");
-        link.href = this.props.path;
-        const returnUrl = `${link.protocol}//${link.host}${link.pathname}${link.search}${link.hash}`;
-        const redirectUrl = `${AppPaths.Login}?${QueryParameterNames.ReturnUrl}=${encodeURIComponent(returnUrl)}`;
+        const redirectUrl = `${AppPaths.Login}?${QueryParameterNames.ReturnUrl}=${this.props.path}`;
         return <Navigate replace to={redirectUrl} />;
     }
 

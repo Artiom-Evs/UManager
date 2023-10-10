@@ -34,6 +34,10 @@ export default defineConfig({
             '^/weatherforecast': {
                 target: 'https://localhost:5001/',
                 secure: false
+            },
+            '^/identity': {
+                target: 'https://localhost:5001/',
+                secure: false
             }
         },
         host: true,

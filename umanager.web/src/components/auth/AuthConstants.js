@@ -4,7 +4,8 @@ const prefix = '/identity'
 export const ApiPaths = {
     Register:`${prefix}/register`,
     Login: `${prefix}/login`,
-    Logout: `${prefix}/logout`
+    Logout: `${prefix}/logout`,
+    Info: `${prefix}/info`
 }
 
 export const AppPaths = {

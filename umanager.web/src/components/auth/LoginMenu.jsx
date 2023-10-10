@@ -9,10 +9,22 @@ export class LoginMenu extends Component {
     constructor(props) {
         super(props);
 
-        this.state = { authorized: false };
+        this.state = { 
+            username: null,
+            authorized: false 
+        };
+
+        // subscribe to authorization change event
+        // it is required for change LoginMenu state after change state in the AuthenticationService
+        this.handleAuthorizationStateChange = this.handleAuthorizationStateChange.bind(this);
+        window.addEventListener("authorization-state-changed", this.handleAuthorizationStateChange);
     }
 
     componentDidMount() {
+        this.populateAuthorizationState();
+    }
+
+    handleAuthorizationStateChange() {
         this.populateAuthorizationState();
     }
 
@@ -40,14 +52,15 @@ export class LoginMenu extends Component {
 
     render() {
         const content = this.state.authorized
-            ? this.renderAuthorized("Some Name")
+            ? this.renderAuthorized(this.state.username)
             : this.renderUnauthorized();
-
+        
         return content;
     }
 
     async populateAuthorizationState() {
-        const state = await authService.isAuthorized();
-        this.setState({ authorized: state });
+        const authorized = await authService.isAuthorized();
+        const username = authService._state.name;
+        this.setState({ authorized, username });
     }
 }
