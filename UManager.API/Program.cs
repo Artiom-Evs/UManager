@@ -1,9 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using UManager.API.Data;
-using UManager.API.Models;
 using UManager.API.Extensions;
-using System.Text;
+using UManager.API.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +30,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapIdentityApiRoutes();
-app.MapIdentityManageApiRoutes();
+app.MapIdentityApiRoutes().AddEndpointFilter<LockedUsersFilter>();
+app.MapIdentityManageApiRoutes().AddEndpointFilter<LockedUsersFilter>();
 
 app.Run();
