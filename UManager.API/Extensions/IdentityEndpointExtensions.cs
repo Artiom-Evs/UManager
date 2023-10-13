@@ -11,7 +11,7 @@ namespace UManager.API.Extensions;
 
 public static class IdentityEndpointExtensions
 {
-    public static WebApplication MapCustomIdentityApiRoutes(this WebApplication app)
+    public static RouteGroupBuilder MapIdentityApiRoutes(this WebApplication app)
     {
         var prefix = app.Configuration.GetValue<string>("Identity:Prefix") ?? "";
         var routeGroup = app.MapGroup(prefix);
@@ -89,14 +89,14 @@ public static class IdentityEndpointExtensions
         return TypedResults.Ok();
     }
 
-    private static async Task<Results<Ok, NotFound>> LogoutGetHandler(ClaimsPrincipal claimsPrincipal, [FromServices] UserManager<AppUser> userManager, [FromServices] SignInManager<AppUser> signInManager)
+    private static async Task<Results<Ok, NotFound>> LogoutGetHandler(HttpContext context, ClaimsPrincipal claimsPrincipal, [FromServices] UserManager<AppUser> userManager)
     {
         if (await userManager.GetUserAsync(claimsPrincipal) == null)
         {
             return TypedResults.NotFound();
         }
 
-        await signInManager.SignOutAsync();
+        await context.SignOutAsync();
         return TypedResults.Ok();
     }
 
