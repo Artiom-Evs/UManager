@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Security.Claims;
-using System.Text;
 using UManager.API.Models;
 
 namespace UManager.API.Extensions;
@@ -19,9 +19,9 @@ public static class IdentityEndpointExtensions
         routeGroup.MapPost("/register", RegisterPostHandler);
         routeGroup.MapPost("/login", LoginPostHandler);
         routeGroup.MapGet("/logout", LogoutGetHandler).RequireAuthorization();
-        routeGroup.MapGet("/info", InfoGetHandler);
+        routeGroup.MapGet("/info", InfoGetHandler).RequireAuthorization();
 
-        return app;
+        return routeGroup;
     }
 
     private static async Task<Results<Ok, ValidationProblem>> RegisterPostHandler([FromBody] RegistrationRequest data, [FromServices] UserManager<AppUser> userManager)
@@ -78,7 +78,11 @@ public static class IdentityEndpointExtensions
 
         var signInResult = await signInManager.PasswordSignInAsync(user, data.Password, data.RememberMe, false);
 
-        if (!signInResult.Succeeded)
+        if (signInResult.IsLockedOut)
+        {
+            return CreateValidationProblem("AccountIsBlocked", "Account is blocked.");
+        }
+        else if (!signInResult.Succeeded)
         {
             return TypedResults.Unauthorized();
         }
@@ -100,13 +104,15 @@ public static class IdentityEndpointExtensions
         return TypedResults.Ok();
     }
 
-    private static Ok<InfoResponse> InfoGetHandler(ClaimsPrincipal claimsPrincipal)
+    private static async Task<Ok<InfoResponse>> InfoGetHandler(ClaimsPrincipal claimsPrincipal, [FromServices] UserManager<AppUser> userManager)
     {
+        var user = await userManager.GetUserAsync(claimsPrincipal);
+
         return TypedResults.Ok(new InfoResponse()
         {
-            Name = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value,
-            Email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value,
-            IsAuthenticated = claimsPrincipal.Identity?.IsAuthenticated ?? false
+            Id = user?.Id,
+            Name = user?.UserName,
+            Email = user?.Email
         });
     }
 

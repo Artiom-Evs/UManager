@@ -33,4 +33,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapIdentityApiRoutes();
+app.MapIdentityManageApiRoutes();
+
 app.Run();
