@@ -6,7 +6,7 @@ using UManager.API.Filters;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("mssql")
+    options.UseSqlite(builder.Configuration.GetConnectionString("sqlite")
         ?? throw new InvalidOperationException("The specified database connection string could not be found.")));
 
 builder.Services.AddEndpointsApiExplorer();
