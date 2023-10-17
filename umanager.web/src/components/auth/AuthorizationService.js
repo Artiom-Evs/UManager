@@ -2,43 +2,59 @@ import { ApiPaths } from "./AuthConstants";
 
 export class AuthorizationService {
     _authStateChanged = new Event("authorization-state-changed");
-    _state = {
+    _isAuthorized = null;
+
+    user = {
+        id: null,
         name: null,
-        email: null,
-        isAuthenticated: false
+        email: null
     };
 
-    async updateState() {
-        const state = await fetch(ApiPaths.Info)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to receive authentication data.');
-                }
-                return response.json();
-            })
-            .then(json => {
-                if (json.isAuthenticated === undefined) {
-                    throw new Error('Server response has uncorrect format.');
-                }
-                return json;
-            })
-            .catch(error => {
-                console.log(`>> ${error}`);
-            });
-
-        if (!state) {
-            return;
+    async isAuthorized(requireUpdate) {
+        if (this._isAuthorized  === null || requireUpdate) {
+            await this.updateState();
         }
-
-        if (this._state.name != state.name || this._state.email != state.email || this._state.isAuthenticated != state.isAuthenticated) {
-            this._state = { ...state };
-            window.dispatchEvent(this._authStateChanged);
-        }
+        return this._isAuthorized;
     }
 
-    async isAuthorized() {
-        await this.updateState();
-        return this._state.isAuthenticated;
+    // TODO: переделать нафиг всё!
+    async updateState() {
+        const result = await fetch(ApiPaths.Info)
+            .then(async response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                else if (response.status == 401) {
+                    throw new Error("Unauthorized.");
+                }
+                throw new Error('Failed to receive authentication data.');
+            })
+            .then(json => {
+                return {
+                    id: json.id,
+                    name: json.name,
+                    email: json.email
+                };
+            })
+            .catch(error => {
+                console.log(`>> AuthService: ${error}`);
+                return {
+                    id: null,
+                    name: null,
+                    email: null
+                };
+            });
+
+        this.setState(result);
+    }
+
+    setState(state){
+        if (this.user.id != state.id || this.user.name != state.name || this.user.email != state.email) {
+            this.user = state;
+            this._isAuthorized = !!state.id;
+            console.log(`>> AuthService: Authorization state changed. Now is ${this._isAuthorized ? 'authorized' : 'unauthorized'}.`)
+            window.dispatchEvent(this._authStateChanged);
+        }
     }
 
     async register(registrationData) {
@@ -51,16 +67,16 @@ export class AuthorizationService {
         })
             .then(async (response) => {
                 if (response.ok) {
-                    return this.createResult(true);
+                    return this.createResult(true, 200);
                 }
                 else if (response.status == 400) {
                     const data = await response.json();
-                    return this.createResult(false, data);
+                    return this.createResult(false, 400, data);
                 }
                 throw new Error("Error occured while sending data");
             })
             .catch((error) => {
-                return this.createResult(false, `${error}`);
+                return this.createResult(false, 500, `${error}`);
             });
 
         console.log(`>> AuthService: ${JSON.stringify(result)}`);
@@ -78,19 +94,19 @@ export class AuthorizationService {
         })
             .then(async (response) => {
                 if (response.ok) {
-                    return this.createResult(true);
+                    return this.createResult(true, 200);
                 }
                 else if (response.status == 400) {
                     const data = await response.json();
-                    return this.createResult(false, data);
+                    return this.createResult(false, 400, data);
                 }
                 else if (response.status == 401) {
-                    return this.createResult(false, "Invalid login or password.");
+                    return this.createResult(false, 401, "Invalid login or password.");
                 }
                 throw new Error("Failed to receive data from the server.");
             })
             .catch((error) => {
-                return this.createResult(false, `${error}`);
+                return this.createResult(false, 500, `${error}`);
             });
 
         await this .updateState();
@@ -102,21 +118,27 @@ export class AuthorizationService {
         const result = await fetch(ApiPaths.Logout)
             .then(response => {
                 if (response.ok) {
-                    return this.createResult(true);
+                    return this.createResult(true, 200);
+                }
+                else if (response.status == 401) {
+                    return this.createResult(false, 401);
                 }
                 throw new Error("Failed to receive data from the server.");
             })
             .catch(error => {
-                return this.createResult(false, `${error}`);
+                return this.createResult(false, 500, `${error}`);
             });
 
-        await this .updateState();
+        if (result.code == 401) {
+            await this.setState({ id: null, name: null, email: null });
+        }
+
         console.log(`>> AuthService: ${JSON.stringify(result)}`);
         return result;
     }
 
-    createResult(status, error) {
-        const result = { status: !!status };
+    createResult(status, code, error) {
+        const result = { status: !!status, code };
         
         if (!error) {
             return result;

@@ -3,6 +3,7 @@ import { NavItem, NavLink, NavbarText } from "reactstrap";
 import { Link } from 'react-router-dom';
 import { AppPaths } from './AuthConstants';
 import authService from './AuthorizationService';
+
 export class LoginMenu extends Component {
     static displayName = LoginMenu.name;
 
@@ -60,7 +61,7 @@ export class LoginMenu extends Component {
 
     async populateAuthorizationState() {
         const authorized = await authService.isAuthorized();
-        const username = authService._state.name;
+        const username = authService.user.name;
         this.setState({ authorized, username });
     }
 }
