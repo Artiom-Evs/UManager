@@ -1,0 +1,63 @@
+
+export class ManageService {
+    async getUsers() {
+        const request = fetch("/identity/manage/users")
+        const result = await this.buildResult(request);
+
+        return result;
+    }
+
+    async deleteUser(userId) {
+        const response = fetch(`/identity/manage/users?id=${userId}`, {
+            method: "DELETE"
+        });
+        const result = await this.buildResult(response);
+        
+        return result;
+    }
+    
+    async blockUser(userId) {
+        const response = fetch(`/identity/manage/users/block?id=${userId}`);
+        const result = await this.buildResult(response);
+        
+        return result;
+    }
+    
+    async unblockUser(userId) {
+        const response = fetch(`/identity/manage/users/unblock?id=${userId}`);
+        const result = await this.buildResult(response);
+
+        return result;
+    }
+    
+    async buildResult(request) {
+        const result = await request
+            .then(async (response )=> {
+                const result = {
+                    state: response.ok,
+                    code: response.status,
+                    data: null
+                };
+
+                result.data = await response.json()
+                    .then(d => d)
+                    .catch(e => { });
+
+                
+                return result;
+            })
+            .catch(e => {
+                return {
+                    state: false,
+                    code: 500,
+                    errors: [ `${e}` ]
+                };
+            });
+
+        return result;
+    }
+}
+
+const manageService = new ManageService();
+
+export default manageService;

@@ -58,6 +58,10 @@ button:focus-visible {
   text-align: center;
 }
 
+.toolbar-icon {
+  vertical-align: -9%;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
