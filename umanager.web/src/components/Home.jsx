@@ -1,60 +1,40 @@
 import { Component } from 'react';
-import { Table } from 'reactstrap'
+import { Link, Navigate } from 'react-router-dom';
+import { AppPaths } from './auth/AuthConstants';
+import authService from './auth/AuthorizationService';
 
 export class Home extends Component {
     static displayName = Home.name;
-
-    constructor(props) {
-        super(props);
-        this.state = { forecasts: [], loading: true };
-    }
+    state = {
+        loading: true,
+        authorized: false
+    };
 
     componentDidMount() {
-        this.populateWeatherData();
-    }
-
-    renderTable(forecasts) {
-        return (
-            <Table className="table table-striped" aria-labelledby="tabelLabel">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Temp. (C)</th>
-                        <th>Temp. (F)</th>
-                        <th>Summary</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {forecasts.map(forecast =>
-                        <tr key={forecast.date}>
-                            <td>{forecast.date}</td>
-                            <td>{forecast.temperatureC}</td>
-                            <td>{forecast.temperatureF}</td>
-                            <td>{forecast.summary}</td>
-                        </tr>
-                    )}
-                </tbody>
-            </Table>
-        );
+        this.populateAuthorizationData();
     }
 
     render() {
-        const contents = this.state.forecasts === undefined
-            ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-            : this.renderTable(this.state.forecasts);
+        const { loading, authorized } = this.state;
 
-        return (
-            <div>
-                <h1 id="tabelLabel">Weather forecast</h1>
-                <p>This component demonstrates fetching data from the server.</p>
-                {contents}
-            </div>
-        );
+        if (loading) {
+            return <em>Loading...</em>;
+        }
+
+        if (authorized) {
+            return <Navigate replace to="/manage" />;
+        }
+
+        return(<div>
+            <h1>Hello, User!</h1>
+            <p>
+                Only registered users can use this service. Please <Link to={AppPaths.Login}>login</Link> or <Link to={AppPaths.Register}>register</Link>.
+            </p>
+        </div>)
     }
 
-    async populateWeatherData() {
-        const response = await fetch('weatherforecast');
-        const data = await response.json();
-        this.setState({ forecasts: data, loading: false });
+    async populateAuthorizationData() {
+        const authorized = await authService.isAuthorized();
+        this.setState({ loading: false, authorized });
     }
 }
