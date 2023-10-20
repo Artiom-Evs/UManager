@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UManager.API", "UManager.AP
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "umanager.web", "umanager.web\umanager.web.esproj", "{7107EACF-1714-48C5-BD54-F227AF18F240}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6CEA9E40-4009-4ACA-A1E2-6C05D6230A69}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
